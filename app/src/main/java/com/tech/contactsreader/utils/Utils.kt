@@ -1,11 +1,14 @@
 package com.tech.contactsreader.utils
 
 import android.content.ContentResolver
+import android.content.Context
+import android.content.pm.PackageManager
 import android.database.Cursor
 import android.os.Handler
 import android.os.Looper
 import android.provider.ContactsContract
 import android.util.Log
+import androidx.core.app.ActivityCompat
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.tech.contactsreader.models.MyContactsModel
 import com.tech.contactsreader.models.MyContactsNumbersModel
@@ -31,15 +34,26 @@ object Utils {
         )
         try {
             val normalizedNumbersAlreadyFound: HashSet<String> = HashSet()
-            if (cursor != null && cursor.count > 0)
+            if (cursor != null && cursor.count > 0) {
+                val normalizedNumberIndex =
+                    cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER)
+                val displayNameIndex =
+                    cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME)
+                val displayNumberIndex =
+                    cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
+                val thumbnailIndex =
+                    cursor.getColumnIndex(ContactsContract.CommonDataKinds.Photo.PHOTO_THUMBNAIL_URI)
+                val photoIndex =
+                    cursor.getColumnIndex(ContactsContract.CommonDataKinds.Photo.PHOTO_URI)
                 while (cursor.moveToNext()) {
                     val normalizedNum =
-                        cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER))
+                        cursor.getString(normalizedNumberIndex)
+                    // duplicates won't add again
                     if (normalizedNumbersAlreadyFound.add(normalizedNum)) {
                         val name =
-                            cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME))
+                            cursor.getString(displayNameIndex)
                         val phoneNumber =
-                            cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
+                            cursor.getString(displayNumberIndex)
                         val parsedNumber =
                             phoneNumberUtil.parse(phoneNumber, countryCode)
                         val mContact = MyContactsModel(name)
@@ -54,26 +68,43 @@ object Utils {
                             continue
                         }
                         mContact.numbers.add(number)
-                        mContact.contactThumbnail = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Photo.PHOTO_THUMBNAIL_URI))
-                            ?: ""
-                        mContact.contactPhoto = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Photo.PHOTO_URI))
-                            ?: ""
-                        mContact.parsedCountryCode = parsedNumber.countryCode.toString()
-                        mContact.parsedNumber = parsedNumber.nationalNumber.toString()
+                        mContact.contactThumbnail =
+                            cursor.getString(thumbnailIndex)
+                                ?: ""
+                        mContact.contactPhoto =
+                            cursor.getString(photoIndex)
+                                ?: ""
                         mContactsList.add(mContact)
                     } else {
                         // Number already added
                     }
 
                 }
+            }
         } catch (e: java.lang.Exception) {
-            Log.d("ContactsReader::", "Checking the Contacts Exception ${e.localizedMessage}")
+            // Number format exception might trigger
         } finally {
             cursor?.close()
             Handler(Looper.getMainLooper()).post {
                 contactsUpdate(mContactsList)
             }
         }
+    }
+
+    fun hasPermissions(
+        context: Context,
+        permissions: Array<String>
+    ): Boolean {
+        for (permission in permissions) {
+            if (ActivityCompat.checkSelfPermission(
+                    context,
+                    permission
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                return false
+            }
+        }
+        return true
     }
 
 }

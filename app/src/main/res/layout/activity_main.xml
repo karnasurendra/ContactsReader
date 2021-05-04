@@ -4,12 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
     tools:context=".screens.MainActivity">
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/page_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/dp_10"
         android:layout_marginTop="@dimen/dp_10"
         android:layout_marginBottom="@dimen/dp_10"
         android:paddingStart="@dimen/dp_10"
@@ -17,6 +19,7 @@
         android:text="@string/my_contacts"
         android:textColor="@color/black"
         android:textSize="@dimen/sp_20"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -25,9 +28,18 @@
         android:id="@+id/contacts_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@id/page_header"
-        app:layout_constraintBottom_toBottomOf="parent"
         android:layout_margin="@dimen/dp_10"
-        />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/page_header" />
+
+    <ProgressBar
+        android:id="@+id/contacts_loader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
