@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.tech.contactsreader.R
 import com.tech.contactsreader.models.MyContactsModel
+import kotlinx.android.synthetic.main.contacts_row.view.*
 
 class MyContactsAdapter(private val mList: ArrayList<MyContactsModel>) :
     RecyclerView.Adapter<MyContactsAdapter.MyContactsViewHolder>() {
@@ -23,9 +24,14 @@ class MyContactsAdapter(private val mList: ArrayList<MyContactsModel>) :
     }
 
     override fun onBindViewHolder(holder: MyContactsViewHolder, position: Int) {
+        holder.bind(mList[position])
     }
 
     inner class MyContactsViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+
+        fun bind(contactsModel: MyContactsModel) {
+            itemView.name_of_contact.text = contactsModel.name
+        }
 
     }
 }

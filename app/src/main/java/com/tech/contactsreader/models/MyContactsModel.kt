@@ -4,4 +4,6 @@ data class MyContactsModel(var name: String){
     var numbers = ArrayList<MyContactsNumbersModel>()
     var parsedCountryCode = ""
     var parsedNumber = ""
+    var contactThumbnail = ""
+    var contactPhoto = ""
 }

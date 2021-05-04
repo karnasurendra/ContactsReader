@@ -5,11 +5,11 @@ import android.database.Cursor
 import android.os.Handler
 import android.os.Looper
 import android.provider.ContactsContract
+import android.util.Log
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.tech.contactsreader.models.MyContactsModel
 import com.tech.contactsreader.models.MyContactsNumbersModel
 import java.util.HashSet
-import kotlin.reflect.KFunction0
 
 object Utils {
 
@@ -40,40 +40,34 @@ object Utils {
                             cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME))
                         val phoneNumber =
                             cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
-
-                        // Parsing the Mobile Number which is not required for now
-                        try {
-                            val parsedNumber =
-                                phoneNumberUtil.parse(phoneNumber, countryCode)
-                            val checkingContact = MyContactsModel(name)
-                            // Checking the List if it is already added. If it is continuing the Loop
-                            if (mContactsList.contains(checkingContact)) {
-                                val oldPos = mContactsList.indexOf(checkingContact)
-                                val numberForOldPos = MyContactsNumbersModel(
-                                    parsedNumber.nationalNumber.toString(),
-                                    parsedNumber.countryCode.toString()
-                                )
-                                mContactsList[oldPos].numbers.add(numberForOldPos)
-                            }
-                            val syncContacts = MyContactsModel("")
-                            syncContacts.name = name
-                            val number = MyContactsNumbersModel(
-                                parsedNumber.nationalNumber.toString(),
-                                parsedNumber.countryCode.toString()
-                            )
-                            syncContacts.numbers.add(number)
-                            syncContacts.parsedCountryCode = parsedNumber.countryCode.toString()
-                            syncContacts.parsedNumber = parsedNumber.nationalNumber.toString()
-                            mContactsList.add(syncContacts)
-                        } catch (e: Exception) {
-                            // Number Format exception might trigger
+                        val parsedNumber =
+                            phoneNumberUtil.parse(phoneNumber, countryCode)
+                        val mContact = MyContactsModel(name)
+                        val number = MyContactsNumbersModel(
+                            parsedNumber.nationalNumber.toString(),
+                            parsedNumber.countryCode.toString()
+                        )
+                        // Checking the contact is already added to List. If it is then continuing the Loop
+                        if (mContactsList.contains(mContact)) {
+                            val oldPos = mContactsList.indexOf(mContact)
+                            mContactsList[oldPos].numbers.add(number)
+                            continue
                         }
-
+                        mContact.numbers.add(number)
+                        mContact.contactThumbnail = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Photo.PHOTO_THUMBNAIL_URI))
+                            ?: ""
+                        mContact.contactPhoto = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Photo.PHOTO_URI))
+                            ?: ""
+                        mContact.parsedCountryCode = parsedNumber.countryCode.toString()
+                        mContact.parsedNumber = parsedNumber.nationalNumber.toString()
+                        mContactsList.add(mContact)
                     } else {
                         // Number already added
                     }
 
                 }
+        } catch (e: java.lang.Exception) {
+            Log.d("ContactsReader::", "Checking the Contacts Exception ${e.localizedMessage}")
         } finally {
             cursor?.close()
             Handler(Looper.getMainLooper()).post {

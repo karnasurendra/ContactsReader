@@ -4,8 +4,11 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.telephony.TelephonyManager
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.tech.contactsreader.R
+import com.tech.contactsreader.adapters.MyContactsAdapter
 import com.tech.contactsreader.viewmodels.MainScreenViewModel
+import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
@@ -29,10 +32,12 @@ class MainActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         val countryCode = telephonyManager.networkCountryIso.toUpperCase(Locale.getDefault())
-        mainScreenViewModel.initReadContacts(contentResolver,countryCode)
+        mainScreenViewModel.initReadContacts(contentResolver, countryCode)
     }
 
     private fun setAdapters() {
-
+        contacts_recycler_view.layoutManager = LinearLayoutManager(this)
+        mainScreenViewModel.myContactsAdapter = MyContactsAdapter(mainScreenViewModel.mContactsList)
+        contacts_recycler_view.adapter = mainScreenViewModel.myContactsAdapter
     }
 }
