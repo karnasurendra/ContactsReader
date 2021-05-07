@@ -24,13 +24,28 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/count_contacts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/page_header"
+        app:layout_constraintStart_toStartOf="@id/page_header"
+        app:layout_constraintEnd_toEndOf="@id/page_header"
+        android:textSize="@dimen/sp_20"
+        android:textColor="@color/black"
+        android:layout_marginTop="@dimen/dp_10"
+        android:layout_marginBottom="@dimen/dp_10"
+        android:layout_marginStart="@dimen/dp_20"
+        />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/contacts_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_margin="@dimen/dp_10"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/page_header" />
+        app:layout_constraintTop_toBottomOf="@id/count_contacts" />
 
     <ProgressBar
         android:id="@+id/contacts_loader"

@@ -12,6 +12,7 @@ import androidx.core.app.ActivityCompat
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.tech.contactsreader.models.MyContactsModel
 import com.tech.contactsreader.models.MyContactsNumbersModel
+import java.lang.Exception
 import java.util.HashSet
 
 object Utils {
@@ -21,6 +22,7 @@ object Utils {
         countryCode: String,
         contactsUpdate: (mList: ArrayList<MyContactsModel>) -> Unit
     ) {
+        Log.d("ReadContacts", "Checking reading contacts issue init")
         val phoneNumberUtil = PhoneNumberUtil.getInstance()
         val mContactsList = ArrayList<MyContactsModel>()
         val order =
@@ -33,6 +35,7 @@ object Utils {
             order
         )
         try {
+            Log.d("ReadContacts", "Checking reading contacts issue try")
             val normalizedNumbersAlreadyFound: HashSet<String> = HashSet()
             if (cursor != null && cursor.count > 0) {
                 val normalizedNumberIndex =
@@ -46,49 +49,55 @@ object Utils {
                 val photoIndex =
                     cursor.getColumnIndex(ContactsContract.CommonDataKinds.Photo.PHOTO_URI)
                 while (cursor.moveToNext()) {
-                    val normalizedNum =
-                        cursor.getString(normalizedNumberIndex)
-                    // duplicates won't add again
-                    if (normalizedNumbersAlreadyFound.add(normalizedNum)) {
-                        val name =
-                            cursor.getString(displayNameIndex)
-                        val phoneNumber =
-                            cursor.getString(displayNumberIndex)
-                        val parsedNumber =
-                            phoneNumberUtil.parse(phoneNumber, countryCode)
-                        val mContact = MyContactsModel(name)
-                        val number = MyContactsNumbersModel(
-                            parsedNumber.nationalNumber.toString(),
-                            parsedNumber.countryCode.toString()
-                        )
-                        // Checking the contact is already added to List. If it is then continuing the Loop
-                        if (mContactsList.contains(mContact)) {
-                            val oldPos = mContactsList.indexOf(mContact)
-                            mContactsList[oldPos].numbers.add(number)
-                            continue
-                        }
-                        mContact.numbers.add(number)
-                        mContact.contactThumbnail =
-                            cursor.getString(thumbnailIndex)
-                                ?: ""
-                        mContact.contactPhoto =
-                            cursor.getString(photoIndex)
-                                ?: ""
-                        mContactsList.add(mContact)
-                    } else {
-                        // Number already added
-                    }
+                    try {
 
+
+                        Log.d("ReadContacts", "Checking reading contacts issue cursor")
+                        val normalizedNum =
+                            cursor.getString(normalizedNumberIndex)
+                        // duplicates won't add again
+                        if (normalizedNumbersAlreadyFound.add(normalizedNum)) {
+                            val name =
+                                cursor.getString(displayNameIndex)
+                            val phoneNumber =
+                                cursor.getString(displayNumberIndex)
+                            val parsedNumber =
+                                phoneNumberUtil.parse(phoneNumber, countryCode)
+                            val mContact = MyContactsModel(name)
+                            val number = MyContactsNumbersModel(
+                                parsedNumber.nationalNumber.toString(),
+                                parsedNumber.countryCode.toString()
+                            )
+                            // Checking the contact is already added to List. If it is then continuing the Loop
+                            if (mContactsList.contains(mContact)) {
+                                val oldPos = mContactsList.indexOf(mContact)
+                                mContactsList[oldPos].numbers.add(number)
+                                continue
+                            }
+                            mContact.numbers.add(number)
+                            mContact.contactThumbnail =
+                                cursor.getString(thumbnailIndex)
+                                    ?: ""
+                            mContact.contactPhoto =
+                                cursor.getString(photoIndex)
+                                    ?: ""
+                            mContactsList.add(mContact)
+                        } else {
+                            // Number already added
+                        }
+                    } catch (e: Exception) {
+                        Log.d("ReadContacts", "Checking reading contacts issue exception")
+                    }
                 }
             }
-        } catch (e: java.lang.Exception) {
-            // Number format exception might trigger
         } finally {
+            Log.d("ReadContacts", "Checking reading contacts issue finally")
             cursor?.close()
             Handler(Looper.getMainLooper()).post {
                 contactsUpdate(mContactsList)
             }
         }
+
     }
 
     fun hasPermissions(

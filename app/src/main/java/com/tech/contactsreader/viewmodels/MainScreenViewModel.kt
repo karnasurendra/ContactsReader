@@ -36,11 +36,13 @@ class MainScreenViewModel : ViewModel() {
             mContactsList.addAll(mList)
             myContactsAdapter.notifyDataSetChanged()
         }
+        uiConnector.updateContacts(mList.size)
         uiConnector.updatedContacts(false)
     }
 
     interface UiConnector{
         fun updatedContacts(isShow:Boolean)
+        fun updateContacts(size:Int)
     }
 
 }

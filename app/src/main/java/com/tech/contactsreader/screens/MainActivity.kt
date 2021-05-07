@@ -82,4 +82,8 @@ class MainActivity : AppCompatActivity(),MainScreenViewModel.UiConnector {
             contacts_loader.visibility = View.GONE
         }
     }
+
+    override fun updateContacts(size: Int) {
+        count_contacts.text = "Total Contacts $size"
+    }
 }
